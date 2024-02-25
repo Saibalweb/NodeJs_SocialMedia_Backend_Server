@@ -1,0 +1,20 @@
+{
+  "name": "fb_backend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "-": "^0.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prettier": "3.2.5"
+  }
+}
