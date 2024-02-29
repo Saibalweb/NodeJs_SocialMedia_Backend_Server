@@ -1,13 +1,17 @@
-import 'dotenv/config';
+import "dotenv/config";
+import app from "./app.js";
 import connectDB from "./db/index.js";
 
-
 // connect Db ---->
-connectDB();
-
-
-
-
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running at Port : ${process.env.PORT}`);
+    });
+  })
+  .catch(err => {
+    console.log("MonogoDb connection Error: ", err);
+  });
 
 // this is a way of connecting to mongo db server
 
