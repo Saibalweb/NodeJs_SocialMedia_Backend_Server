@@ -22,15 +22,21 @@ const userSchema = mongoose.Schema(
       unique: true,
       lowercase: true,
     },
-    password: {},
+    password: {
+      type: String,
+      required: [true, "password is required"],
+    },
     DOB: {
       type: String,
     },
-    avatar: {
+    image: {
       type: String,
       required: true,
     },
     coverImage: {
+      type: String,
+    },
+    refreshToken: {
       type: String,
     },
   },
@@ -54,7 +60,7 @@ userSchema.methods.generateAccessToken = function () {
       email: this.email,
     },
     process.env.ACCESS_TOKEN,
-    { expiresIn: REFRESH_TOKEN_EXPIRY },
+    { expiresIn: ACCESS_TOKEN_EXPIRY },
   );
 };
 userSchema.methods.generateRefreshToken = function () {
@@ -62,7 +68,7 @@ userSchema.methods.generateRefreshToken = function () {
     {
       id: this._id,
     },
-    
+
     process.env.REFRESH_TOKEN,
     { expiresIn: REFRESH_TOKEN_EXPIRY },
   );
