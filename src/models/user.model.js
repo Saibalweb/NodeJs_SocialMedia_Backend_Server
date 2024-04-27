@@ -29,7 +29,7 @@ const userSchema = mongoose.Schema(
     DOB: {
       type: String,
     },
-    image: {
+    avatar: {
       type: String,
       required: true,
     },
