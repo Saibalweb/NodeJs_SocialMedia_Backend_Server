@@ -60,7 +60,7 @@ userSchema.methods.generateAccessToken = function () {
       email: this.email,
     },
     process.env.ACCESS_TOKEN,
-    { expiresIn: ACCESS_TOKEN_EXPIRY },
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
   );
 };
 userSchema.methods.generateRefreshToken = function () {
@@ -70,7 +70,7 @@ userSchema.methods.generateRefreshToken = function () {
     },
 
     process.env.REFRESH_TOKEN,
-    { expiresIn: REFRESH_TOKEN_EXPIRY },
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
   );
 };
 export const User = mongoose.model("User", userSchema);
