@@ -128,8 +128,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler (async(req,res)=>{
-    const {user}= req.user;
-    await User.findOneAndUpdate(user._id,{
+    await User.findOneAndUpdate(req.user._id,{
       $set:{refreshToken :undefined}
     },{
       new:true
