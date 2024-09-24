@@ -132,7 +132,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findOneAndUpdate(
     req.user._id,
     {
-      $set: { refreshToken: undefined },
+      $unset: { refreshToken: 1 }, //remove the field from document
     },
     {
       new: true,
@@ -151,7 +151,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken = req.cookies?.refreshToken;
-
   if (!incomingRefreshToken) {
     throw new ApiError(400, "No token provided");
   }
@@ -160,8 +159,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       incomingRefreshToken,
       process.env.REFRESH_TOKEN,
     );
-
-    const user = User.findById(decodedToken.id);
+    const user = await User.findById(decodedToken.id);
 
     if (!user) {
       throw new ApiError(401, "Invalid RefreshToken!");
@@ -170,10 +168,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "RefreshToken is expired or used!");
     }
 
-    const { accessToken, newRefreshToken } = generateAccessAndRefreshToken(
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user?._id,
     );
-
     const options = {
       httpOnly: true,
       secure: true,
@@ -181,11 +178,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     res
       .status(200)
       .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("refreshToken", refreshToken, options)
       .json(
-        new ApiError(
+        new ApiResponse(
           200,
-          { accessToken, refreshToken: newRefreshToken },
+          { accessToken, refreshToken:refreshToken },
           "New Access Token and refreshToken Generated!",
         ),
       );
@@ -200,7 +197,8 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   if (!oldPassword || !newPassword) {
     throw new ApiError(400, "Please provide old and new Password!");
   }
-  const user = await findById(req.user._id);
+  console.log(req.user._id);
+  const user = await User.findById(req.user._id);
   const isPasswordCorrect = await user.checkPassword(oldPassword);
   if (!isPasswordCorrect) {
     throw new ApiError(401, "Wrong Old Password!");
@@ -231,7 +229,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
       "Internal Server problem while uploading the image! Please try again",
     );
   }
-  const user = await User.findByIdandUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -259,7 +257,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
       "Internal Server problem while uploading the cover image! Please try again",
     );
   }
-  const user = await User.findByIdandUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
