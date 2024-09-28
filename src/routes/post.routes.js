@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { uploadPost } from "../controllers/post.controller.js";
+import { updatePost, uploadPost } from "../controllers/post.controller.js";
 
 const router = Router();
 router.use(verifyJWT); // this actually checks user jwt for all this routes
@@ -19,4 +19,5 @@ router.route('/upload').post(
     ]),
     uploadPost
 );
+router.route('/update/:id').patch(updatePost);
 export default router;
