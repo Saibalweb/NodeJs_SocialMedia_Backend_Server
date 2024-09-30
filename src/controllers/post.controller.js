@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Post } from "../models/post.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -58,8 +59,12 @@ const deletePost = asyncHandler(async(req,res)=>{
     res.status(200).json(new ApiResponse(200,{},"The Post is successfully deleted"));
 })
 const getAllPost = asyncHandler(async(req,res)=>{
-    const id = req.user._id;
-    const allPosts = await Post.find({owner:id});
+    const id = req.params.id;
+    console.log(req.params);
+    if(!id){
+        throw new ApiError(400,"Please provide Unique id");
+    }
+    const allPosts = await Post.find({owner:new mongoose.Types.ObjectId(`${id}`)});
     res.status(202).json(new ApiResponse(202,{response:allPosts},"Successfully Fetched all Posts"))
 })
 const getPostById = asyncHandler(async(req,res)=>{
@@ -73,4 +78,29 @@ const getPostById = asyncHandler(async(req,res)=>{
     if(!post) throw new ApiError(500,"The post id is not valid");
     res.status(200).json(new ApiResponse(200,{response:post},"Post fetched successefully!"))
 })
-export {uploadPost,updatePost,deletePost,getAllPost,getPostById};
+const getPostByNum = asyncHandler(async(req,res)=>{
+    const userId = req.params.id;
+    const {page,size}= req.query;
+    if(!userId){
+        throw new ApiError(405,"Please Provide user Unique id");
+    }
+    if(!page || !size){
+        throw new ApiError(406,"Please provide both page and size in query")
+    }
+    const pageNumber = parseInt(page);
+    const pageSize = parseInt(size);
+    const skip = (pageNumber-1)*pageSize;
+    const posts = await Post.find({owner:new mongoose.Types.ObjectId(`${userId}`)})
+    .skip(skip)
+    .limit(pageSize)
+    .sort({createdAt:-1});
+    const totalPosts = await Post.countDocuments({owner:new mongoose.Types.ObjectId(`${userId}`)});
+
+    res.status(200).json(new ApiResponse(200,{
+        posts,
+        totalPages:Math.ceil(totalPosts/pageSize),
+        currentPage:pageNumber,
+        totalPosts
+    },"This is testing"));
+})
+export {uploadPost,updatePost,deletePost,getAllPost,getPostById,getPostByNum};

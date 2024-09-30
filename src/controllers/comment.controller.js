@@ -59,4 +59,12 @@ const deleteComment = asyncHandler(async(req,res)=>{
     const deletedComment = await Comment.findByIdAndDelete(comment._id);
     res.status(202).json(new ApiResponse(202,{response:deletedComment},"Your comment deleted successefully"))
 });
-export {uploadComment,updateComment,deleteComment};
+const getAllcomments = asyncHandler(async(req,res)=>{
+    const postId = req.params.postId;
+    if(!postId){
+        throw new ApiError(406,"Please provide post Unique id");
+    }
+    const comments = await Comment.find({postId:new mongoose.Types.ObjectId(`${postId}`)});
+    res.status(202).json(new ApiResponse(202,{response:comments},"Fetched All comments Successfully"));
+})
+export {uploadComment,updateComment,deleteComment,getAllcomments};
