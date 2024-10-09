@@ -23,7 +23,7 @@ const addLiketoPost = asyncHandler(async(req,res)=>{
         postId:post._id,
         ownerId:req.user._id
     })
-    req.status(202).json(new ApiResponse(202,{response:like},"Added Like to this Post"))
+    res.status(202).json(new ApiResponse(202,{response:like},"Added Like to this Post"))
 });
 const removeLiketoPost = asyncHandler(async(req,res)=>{
     const postId = req.params?.postId;
@@ -32,7 +32,7 @@ const removeLiketoPost = asyncHandler(async(req,res)=>{
     };
     const post = await Post.findById(new mongoose.Types.ObjectId(`${postId}`));
     if(!post){
-        throw new ApiError("This post does not exists");
+        throw new ApiError(405,"This post does not exists");
     }
     const postLike = await PostLike.findOne({postId:post?._id,ownerId:req.user?._id});
     if(!postLike){

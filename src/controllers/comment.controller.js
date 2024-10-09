@@ -10,15 +10,11 @@ const uploadComment = asyncHandler(async(req,res)=>{
     if(!postId || !content){
         throw new ApiError(403,"Please provide both postId & content!");
     }
-    console.log(req.body);
-    console.log(req.user._id);
-    console.log(typeof postId);
     const postObjId =new mongoose.Types.ObjectId(`${postId}`);
     const post = await Post.findById(postObjId)
     if(!post){
         throw new ApiError(404,"This post does not exists!");
     }
-    console.log(post);
     const comment = await Comment.create({
         postId:post._id,
         ownerId:req.user._id,
