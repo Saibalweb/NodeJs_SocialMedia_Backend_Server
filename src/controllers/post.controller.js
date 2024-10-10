@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { connect } from "mongoose";
 import { Post } from "../models/post.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -90,10 +90,57 @@ const getPostByNum = asyncHandler(async(req,res)=>{
     const pageNumber = parseInt(page);
     const pageSize = parseInt(size);
     const skip = (pageNumber-1)*pageSize;
-    const posts = await Post.find({owner:new mongoose.Types.ObjectId(`${userId}`)})
-    .skip(skip)
-    .limit(pageSize)
-    .sort({createdAt:-1});
+    // const posts = await Post.find({owner:new mongoose.Types.ObjectId(`${userId}`)})
+    // .skip(skip)
+    // .limit(pageSize)
+    // .sort({createdAt:-1});
+        const posts = await Post.aggregate([
+            {
+                $match:{
+                    owner:new mongoose.Types.ObjectId(`${userId}`)
+                }
+            },
+            {
+                $skip:skip
+            },
+            {
+                $limit:pageSize
+            },
+            {
+                $sort:{
+                    createdAt:-1
+                }
+            },
+            {
+                $lookup:{
+                    from:"postlikes",
+                    localField:"_id",
+                    foreignField:"postId",
+                    as:"postLike"
+                }
+            },
+            {
+                $lookup:{
+                    from:"comments",
+                    localField:"_id",
+                    foreignField:"postId",
+                    as:"comment"
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    title: 1,
+                    owner:1,
+                    content:1,
+                    img:1,
+                    audience:1,
+                    updatedAt: 1,
+                    postLikeCount: { $size: "$postLike" },
+                    commentCount: { $size: "$comment" }
+                }
+            }
+        ])
     const totalPosts = await Post.countDocuments({owner:new mongoose.Types.ObjectId(`${userId}`)});
 
     res.status(200).json(new ApiResponse(200,{
@@ -101,6 +148,6 @@ const getPostByNum = asyncHandler(async(req,res)=>{
         totalPages:Math.ceil(totalPosts/pageSize),
         currentPage:pageNumber,
         totalPosts
-    },"This is testing"));
+    },"Fetched post successfully!"));
 })
 export {uploadPost,updatePost,deletePost,getAllPost,getPostById,getPostByNum};
