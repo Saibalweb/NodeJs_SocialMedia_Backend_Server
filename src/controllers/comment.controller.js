@@ -40,7 +40,7 @@ const updateComment = asyncHandler(async(req,res)=>{
     }
     comment.content = content;
     const updateComment = await comment.save();
-    res.status(203).json(new ApiResponse(203,{response:updateComment},"Comment Updated Successefully!"))
+    res.status(203).json(new ApiResponse(202,{response:updateComment},"Comment Updated Successefully!"))
 
 })
 const deleteComment = asyncHandler(async(req,res)=>{
@@ -60,7 +60,38 @@ const getAllcomments = asyncHandler(async(req,res)=>{
     if(!postId){
         throw new ApiError(406,"Please provide post Unique id");
     }
-    const comments = await Comment.find({postId:new mongoose.Types.ObjectId(`${postId}`)});
+    // const comments = await Comment.find({postId:new mongoose.Types.ObjectId(`${postId}`)});
+    const comments = await Comment.aggregate([
+        {
+            $match:{
+                postId:new mongoose.Types.ObjectId(`${postId}`)
+            }
+        },
+        {
+            $lookup:{
+                from:"users",
+                localField:"ownerId",
+                foreignField:"_id",
+                as:"commentOwner"
+            }
+        },
+        {
+            $unwind:"$commentOwner",
+        },
+        {
+            $project:{
+                _id:1,
+                postId:1,
+                ownerId:1,
+                content:1,
+                createdAt:1,
+                updatedAt:1,
+                ownerName:"$commentOwner.name",
+                ownerUserName:"$commentOwner.userName",
+                ownerAvatar:"$commentOwner.avatar"
+            }
+        }
+    ])
     res.status(202).json(new ApiResponse(202,{response:comments},"Fetched All comments Successfully"));
 })
 export {uploadComment,updateComment,deleteComment,getAllcomments};

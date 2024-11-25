@@ -101,15 +101,15 @@ const getPostByNum = asyncHandler(async(req,res)=>{
                 }
             },
             {
+                $sort:{
+                    createdAt:-1
+                }
+            },
+            {
                 $skip:skip
             },
             {
                 $limit:pageSize
-            },
-            {
-                $sort:{
-                    createdAt:-1
-                }
             },
             {
                 $lookup:{
@@ -128,6 +128,23 @@ const getPostByNum = asyncHandler(async(req,res)=>{
                 }
             },
             {
+                $addFields:{
+                    liked:{
+                        $gt:[
+                            {
+                                $size:{
+                                    $filter:{
+                                        input:"$postLike",
+                                        as:"like",
+                                        cond:{$eq:["$$like.ownerId",req.user._id]}
+                                    }
+                                }
+                            },0
+                        ]
+                    }
+                }
+            },
+            {
                 $project: {
                     _id: 1,
                     title: 1,
@@ -135,9 +152,10 @@ const getPostByNum = asyncHandler(async(req,res)=>{
                     content:1,
                     img:1,
                     audience:1,
-                    updatedAt: 1,
+                    createdAt: 1,
                     postLikeCount: { $size: "$postLike" },
-                    commentCount: { $size: "$comment" }
+                    commentCount: { $size: "$comment" },
+                    liked:1
                 }
             }
         ])
