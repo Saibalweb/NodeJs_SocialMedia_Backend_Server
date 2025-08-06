@@ -22,7 +22,7 @@ Please Visit - <a href="https://github.com/Saibalweb/Friendly" target="_blank">F
 ## Data Model 
 The data model for this application is as follows:
 
-![Friendly-dataModel](https://github.com/Saibalweb/NodeJs_SocialMedia_Backend_Server/blob/master/Readme_assets/Friendly_datamodel.png)
+![Friendly-dataModel](https://raw.githubusercontent.com/Saibalweb/NodeJs_SocialMedia_Backend_Server/master/Readme_assets/Friendly_datamodel.png)
 
 ## Project Structure 
 The folder structure of this app is explained below:
